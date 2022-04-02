@@ -1,0 +1,8 @@
+{"from":"alice","to":"bob","value":10,"data":""}
+{"from":"alice","to":"alice","value":7,"data":"reward"}
+{"from":"bob","to":"charlie","value":1,"data":""}
+{"from":"alice","to":"bob","value":3,"data":""}
+{"from":"alice","to":"bob","value":3,"data":""}
+{"from":"alice","to":"bob","value":3,"data":""}
+{"from":"alice","to":"bob","value":3,"data":""}
+{"from":"bob","to":"charlie","value":10,"data":""}
