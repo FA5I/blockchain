@@ -2,20 +2,25 @@ package database
 
 import (
 	"bufio"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 )
+
+type Snapshot [32]byte
 
 type State struct {
 	Balances  map[Account]int `json:"balances"`
 	txMempool []Transaction
 	dbFile    *os.File
+	snapshot  Snapshot
 }
 
 // persist transactions in the mempool to the database
-func (s *State) Persist() error {
+func (s *State) Persist() (Snapshot, error) {
 	mempool := make([]Transaction, len(s.txMempool))
 	copy(mempool, s.txMempool)
 
@@ -23,17 +28,17 @@ func (s *State) Persist() error {
 
 		txjsn, err := json.Marshal(mempool[i])
 		if err != nil {
-			return err
+			return Snapshot{}, err
 		}
 
 		if _, err := s.dbFile.Write(append(txjsn, '\n')); err != nil {
-			return err
+			return Snapshot{}, err
 		}
 
 		s.txMempool = s.txMempool[1:]
 	}
 
-	return nil
+	return s.snapshot, nil
 
 }
 
@@ -61,6 +66,29 @@ func (s *State) Add(tx Transaction) error {
 	s.txMempool = append(s.txMempool, tx)
 
 	return nil
+}
+
+/*
+Create snapshot of blockchain state
+*/
+func (s *State) DoSnapshot() error {
+	_, err := s.dbFile.Seek(0, 0)
+	if err != nil {
+		return err
+	}
+
+	data, err := ioutil.ReadAll(s.dbFile)
+	if err != nil {
+		return err
+	}
+
+	s.snapshot = sha256.Sum256(data)
+
+	return nil
+}
+
+func (s *State) LatestSnapshot() Snapshot {
+	return s.snapshot
 }
 
 /*
@@ -100,7 +128,7 @@ func NewStateFromDisc() (*State, error) {
 	// defer transactionsFile.Close()
 
 	scanner := bufio.NewScanner(transactionsFile)
-	state := &State{balances, make([]Transaction, 0), transactionsFile}
+	state := &State{balances, make([]Transaction, 0), transactionsFile, Snapshot{}}
 
 	for scanner.Scan() {
 		if err := scanner.Err(); err != nil {
@@ -113,6 +141,11 @@ func NewStateFromDisc() (*State, error) {
 		if err := state.apply(tx); err != nil {
 			return nil, err
 		}
+	}
+
+	err = state.DoSnapshot()
+	if err != nil {
+		return nil, err
 	}
 
 	return state, nil

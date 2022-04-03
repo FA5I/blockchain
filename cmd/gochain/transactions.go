@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/FA5I/blockchain/database"
@@ -54,8 +55,13 @@ func txAddCmd() *cobra.Command {
 				panic(err)
 			}
 
+			fmt.Println("Persisting new TX to disk:")
+			txJson, _ := json.MarshalIndent(tx, "", "\t")
+			fmt.Println(string(txJson))
+			fmt.Printf("New snapshot: %x\n", state.LatestSnapshot())
+
 			// persist mempool to the database
-			err = state.Persist()
+			_, err = state.Persist()
 			if err != nil {
 				panic(err)
 			}
