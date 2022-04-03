@@ -50,7 +50,7 @@ func txAddCmd() *cobra.Command {
 			}
 
 			// add transaction the mempool
-			err = state.Add(tx)
+			err = state.AddTx(tx)
 			if err != nil {
 				panic(err)
 			}
@@ -58,7 +58,7 @@ func txAddCmd() *cobra.Command {
 			fmt.Println("Persisting new TX to disk:")
 			txJson, _ := json.MarshalIndent(tx, "", "\t")
 			fmt.Println(string(txJson))
-			fmt.Printf("New snapshot: %x\n", state.LatestSnapshot())
+			// fmt.Printf("New snapshot: %x\n", state.LatestSnapshot())
 
 			// persist mempool to the database
 			_, err = state.Persist()

@@ -33,7 +33,7 @@ func balancesListCmd() *cobra.Command {
 				panic(err)
 			}
 
-			fmt.Printf("Account balances at %x\n", state.LatestSnapshot())
+			// fmt.Printf("Account balances at %x\n", state.)
 			fmt.Println("=================")
 			for account, balance := range state.Balances {
 				fmt.Printf("%s: %d\n", account, balance)
