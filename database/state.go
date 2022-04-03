@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
 	"time"
 )
 
@@ -20,33 +19,23 @@ type State struct {
 Creates the latest state by building up all historical transactions
 from the Genesis block until current.
 */
-func NewStateFromDisc() (*State, error) {
-	cwd, err := os.Getwd()
+func NewStateFromDisc(dataDir string) (*State, error) {
+	err := initDataDirIfNotExists(dataDir)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	// read in the genesis block and seed the initial account balances
-	genesisPath := filepath.Join(cwd, "database", "genesis.json")
-
-	genesisFile, err := os.Open(genesisPath)
+	gen, err := loadGenesis(getGenesisJsonFilePath(dataDir))
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	defer genesisFile.Close()
-
-	var genesisBlock GenesisBlock
-	jsonParser := json.NewDecoder(genesisFile)
-	jsonParser.Decode(&genesisBlock)
 
 	balances := make(map[Account]int)
-	for account, balance := range genesisBlock.Balances {
+	for account, balance := range gen.Balances {
 		balances[account] = balance
 	}
 
-	// Next, read in all the new transactions and update balances sequentially
-	txdbPath := filepath.Join(cwd, "database", "block.db")
-	blockFile, err := os.OpenFile(txdbPath, os.O_APPEND|os.O_RDWR, 0600)
+	blockFile, err := os.OpenFile(getBlocksDbFilePath(dataDir), os.O_APPEND|os.O_RDWR, 0600)
 	if err != nil {
 		return nil, err
 	}
@@ -160,5 +149,7 @@ func (s *State) applyBlock(b Block) error {
 			return err
 		}
 	}
+
+	fmt.Println("Block applied.")
 	return nil
 }

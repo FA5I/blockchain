@@ -44,7 +44,8 @@ func txAddCmd() *cobra.Command {
 
 			tx := database.NewTransaction(fromAcc, toAcc, value, data)
 
-			state, err := database.NewStateFromDisc()
+			dataDir, _ := cmd.Flags().GetString(flagDataDir)
+			state, err := database.NewStateFromDisc(dataDir)
 			if err != nil {
 				panic(err)
 			}

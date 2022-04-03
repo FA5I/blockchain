@@ -28,18 +28,25 @@ func balancesListCmd() *cobra.Command {
 		Use:   "list",
 		Short: "List all balances.",
 		Run: func(cmd *cobra.Command, args []string) {
-			state, err := database.NewStateFromDisc()
+			dataDir, err := cmd.Flags().GetString(flagDataDir)
 			if err != nil {
 				panic(err)
 			}
 
-			// fmt.Printf("Account balances at %x\n", state.)
+			state, err := database.NewStateFromDisc(dataDir)
+			if err != nil {
+				panic(err)
+			}
+
+			fmt.Println("Account balances:")
 			fmt.Println("=================")
 			for account, balance := range state.Balances {
 				fmt.Printf("%s: %d\n", account, balance)
 			}
 		},
 	}
+
+	addDefaultRequiredFlags(balancesListCmd)
 
 	return balancesListCmd
 }
