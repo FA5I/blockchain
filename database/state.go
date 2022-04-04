@@ -12,7 +12,7 @@ type State struct {
 	Balances        map[Account]int `json:"balances"`
 	txMempool       []Transaction
 	dbFile          *os.File
-	latestBlockHash Hash
+	LatestBlockHash Hash
 }
 
 /*
@@ -60,7 +60,7 @@ func NewStateFromDisc(dataDir string) (*State, error) {
 			return nil, err
 		}
 
-		state.latestBlockHash = blockfs.Key
+		state.LatestBlockHash = blockfs.Key
 	}
 
 	return state, nil
@@ -69,7 +69,7 @@ func NewStateFromDisc(dataDir string) (*State, error) {
 // persist transactions in the mempool to the database
 func (s *State) Persist() (Hash, error) {
 	// create a new block with new transactions
-	block := NewBlock(s.latestBlockHash, uint64(time.Now().Unix()), s.txMempool)
+	block := NewBlock(s.LatestBlockHash, uint64(time.Now().Unix()), s.txMempool)
 
 	blockHash, err := block.Hash()
 	if err != nil {
@@ -91,11 +91,11 @@ func (s *State) Persist() (Hash, error) {
 		return Hash{}, nil
 	}
 
-	s.latestBlockHash = blockHash
+	s.LatestBlockHash = blockHash
 
 	s.txMempool = []Transaction{}
 
-	return s.latestBlockHash, nil
+	return s.LatestBlockHash, nil
 
 }
 

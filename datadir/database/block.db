@@ -1,0 +1,2 @@
+{"hash":"ee873b4d2bc84138f90da41e5f01d34aa6fd844c6b13a8284462bba2321b01de","block":{"Header":{"Parent":"0000000000000000000000000000000000000000000000000000000000000000","Time":1649111462},"NewTransactions":[{"from":"alice","to":"bob","value":10,"data":""}]}}
+{"hash":"d522d52175db4b6b419dd642bf19d881d5ecd7e5f6fd0384553014ef6be19d5c","block":{"Header":{"Parent":"ee873b4d2bc84138f90da41e5f01d34aa6fd844c6b13a8284462bba2321b01de","Time":1649111619},"NewTransactions":[{"from":"alice","to":"alice","value":100,"data":"reward"}]}}

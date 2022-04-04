@@ -19,6 +19,7 @@ func main() {
 	cmd.AddCommand(versionCmd)
 	cmd.AddCommand(balancesCmd())
 	cmd.AddCommand(txCmd())
+	cmd.AddCommand(runCmd())
 
 	err := cmd.Execute()
 	if err != nil {
