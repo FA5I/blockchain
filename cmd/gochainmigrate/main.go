@@ -10,6 +10,7 @@ import (
 
 func main() {
 	cwd, _ := os.Getwd()
+
 	state, err := database.NewStateFromDisc(cwd)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -18,6 +19,7 @@ func main() {
 
 	block0 := database.NewBlock(
 		database.Hash{},
+		0,
 		uint64(time.Now().Unix()),
 		[]database.Transaction{
 			database.NewTransaction("alice", "bob", 3, ""),
@@ -30,6 +32,7 @@ func main() {
 
 	block1 := database.NewBlock(
 		block0hash,
+		1,
 		uint64(time.Now().Unix()),
 		[]database.Transaction{
 			database.NewTransaction("bob", "charlie", 1, ""),

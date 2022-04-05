@@ -20,6 +20,7 @@ func (h *Hash) UnmarshalText(data []byte) error {
 type BlockHeader struct {
 	Parent Hash
 	Time   uint64
+	Number uint64
 }
 
 type Block struct {
@@ -44,6 +45,6 @@ func (b Block) Hash() (Hash, error) {
 	return sha256.Sum256(blockJson), nil
 }
 
-func NewBlock(parentHash Hash, time uint64, newTransactions []Transaction) Block {
-	return Block{BlockHeader{parentHash, time}, newTransactions}
+func NewBlock(parentHash Hash, number uint64, time uint64, newTransactions []Transaction) Block {
+	return Block{BlockHeader{parentHash, time, number}, newTransactions}
 }

@@ -7,7 +7,7 @@ import (
 )
 
 func getDatabaseDirPath(dataDir string) string {
-	return filepath.Join(dataDir, "database")
+	return filepath.Join(dataDir, "datadir")
 }
 func getGenesisJsonFilePath(dataDir string) string {
 	return filepath.Join(getDatabaseDirPath(dataDir), "genesis.json")

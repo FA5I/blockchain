@@ -13,6 +13,7 @@ type State struct {
 	txMempool       []Transaction
 	dbFile          *os.File
 	LatestBlockHash Hash
+	Block           Block
 }
 
 /*
@@ -41,7 +42,7 @@ func NewStateFromDisc(dataDir string) (*State, error) {
 	}
 
 	scanner := bufio.NewScanner(blockFile)
-	state := &State{balances, make([]Transaction, 0), blockFile, Hash{}}
+	state := &State{balances, make([]Transaction, 0), blockFile, Hash{}, Block{}}
 
 	for scanner.Scan() {
 		if err := scanner.Err(); err != nil {
@@ -49,6 +50,11 @@ func NewStateFromDisc(dataDir string) (*State, error) {
 		}
 
 		blockFsJson := scanner.Bytes()
+
+		if len(blockFsJson) == 0 {
+			break
+		}
+
 		var blockfs BlockFS
 		err := json.Unmarshal(blockFsJson, &blockfs)
 		if err != nil {
@@ -60,6 +66,7 @@ func NewStateFromDisc(dataDir string) (*State, error) {
 			return nil, err
 		}
 
+		state.Block = blockfs.Value
 		state.LatestBlockHash = blockfs.Key
 	}
 
@@ -68,8 +75,17 @@ func NewStateFromDisc(dataDir string) (*State, error) {
 
 // persist transactions in the mempool to the database
 func (s *State) Persist() (Hash, error) {
+
+	fmt.Println(s.Block.Header.Number)
+
 	// create a new block with new transactions
-	block := NewBlock(s.LatestBlockHash, uint64(time.Now().Unix()), s.txMempool)
+	block := NewBlock(
+		s.LatestBlockHash,
+		s.Block.Header.Number+1,
+		uint64(time.Now().Unix()),
+		s.txMempool)
+
+	// fmt.Println(block)
 
 	blockHash, err := block.Hash()
 	if err != nil {
@@ -84,13 +100,14 @@ func (s *State) Persist() (Hash, error) {
 	}
 
 	fmt.Printf("Persisting new Block to disk:\n")
-	fmt.Printf("\t%s\n\n", blockfsJson)
+	// fmt.Printf("\t%s\n\n", blockfsJson)
 
 	_, err = s.dbFile.Write(append(blockfsJson, '\n'))
 	if err != nil {
 		return Hash{}, nil
 	}
 
+	s.Block = block
 	s.LatestBlockHash = blockHash
 
 	s.txMempool = []Transaction{}
